@@ -1,0 +1,10 @@
+.DS_Store
+web/bower_components/
+web/images/
+backend/backend
+master_server/server_list.json
+game/game
+
+master_server/master_server
+
+master_server/server_list.json
