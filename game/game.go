@@ -10,15 +10,14 @@ import (
 	"os"
 	// "strconv"
 
-	"github.com/etinlb/falcon/core_lib"
 	"github.com/etinlb/falcon/logger"
 	"github.com/etinlb/falcon/network"
-	"github.com/etinlb/falcon/websockethandler"
 	"github.com/gorilla/websocket"
 )
 
 // various object maps to keep track of different types of objects
-// var gameObjects map[string]GameObject
+var gameObjects map[string]network.NetworkedGameObjects
+
 // var playerObjects map[string]*Player
 // var physicsComponents map[string]*PhysicsComponent
 
@@ -31,10 +30,11 @@ var clientIdMap map[int]*network.ClientData
 
 // map that keeps track of what data came from what client
 
-var clientBackend websockethandler.BackendController
+var clientBackend network.NetworkController
 
-func cleanUpSocket(conn *websocket.Conn) {
+func cleanUpSocket(conn *websocket.Conn) *network.Message {
 	logger.Info.Printf("Cleaning up connection from %s\n", conn.RemoteAddr())
+	return nil
 	// logger.Info.Println(len(gameObjects))
 	// clientId := connections[conn]
 	// clientData := clientIdMap[clientId]
@@ -58,7 +58,7 @@ func cleanUpSocket(conn *websocket.Conn) {
 func initializeGameData() {
 	logger.Trace.Println("Initalizing all game data")
 	// keyed by id
-	// gameObjects = make(map[string]GameObject)
+	gameObjects = make(map[string]network.NetworkedGameObjects)
 	// playerObjects = make(map[string]*Player)
 	// physicsComponents = make(map[string]*PhysicsComponent)
 }
@@ -93,7 +93,7 @@ func main() {
 	// =========Connection Initializations======================================
 	initializeConnectionData()
 
-	clientBackend = websockethandler.NewBackendController(HandleClientEvent,
+	clientBackend = network.NewNetworkController(HandleClientEvent,
 		cleanUpSocket,
 		initializeClientData)
 
@@ -130,8 +130,8 @@ func runHttpServer(addr string) {
 	logger.Warning.Println(err.Error())
 }
 
-func printGameObjectMap(gameObjects []core_lib.GameObject) {
-	for _, obj := range gameObjects {
-		logger.Info.Println(obj)
-	}
-}
+// func printGameObjectMap(gameObjects []core_lib.GameObject) {
+// 	for _, obj := range gameObjects {
+// 		logger.Info.Println(obj)
+// 	}
+// }

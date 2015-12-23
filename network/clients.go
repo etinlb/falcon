@@ -8,6 +8,11 @@ import (
 	// "sync/atomic"
 )
 
+type NetworkedGameObjects interface {
+	core_lib.GameObject
+	BuildAddMessage() Message
+}
+
 type ClientConnectMessage struct {
 	PlayerId string `json:"player_id"`
 	Latency  int
@@ -15,8 +20,9 @@ type ClientConnectMessage struct {
 
 // keeps track of data from a client
 type ClientData struct {
-	Socket               *websocket.Conn
-	GameObjects          map[string]core_lib.GameObject
+	Socket      *websocket.Conn
+	GameObjects map[string]core_lib.GameObject
+	// Player               core_lib.GameObject
 	ClientId             int
 	CurrentSequnceNumber int
 	InputQueue           *MessageQueue

@@ -60,6 +60,7 @@ var FancyWebSocket = function(url){
   // dispatch to the right handlers
   conn.onmessage = function(evt){
     var json = JSON.parse(evt.data)
+    console.log("Got data" + json);
     // check if multiple events were sent in this message
     // TODO: Figure out a better convention other than, "Is this event or events?"
     // But avoid type checking....

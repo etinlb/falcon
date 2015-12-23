@@ -1,16 +1,22 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/etinlb/falcon/logger"
 	"github.com/etinlb/falcon/network"
-	"github.com/etinlb/falcon/websockethandler"
 	"time"
 )
+
+// XXX============================move somewhere else===========
+type MoveMessage struct {
+	X int `json:"xVel"`
+	Y int `json:"yVel"`
+}
 
 // Spawns the game loop and returns the channels to comminucate with the game
 // TODO: Currently that is just the move channels, maybe return the ticker channel?
 // TODO: TODO: Make it return channel of channels
-func StartGameLoop(socketHandler websockethandler.BackendController) {
+func StartGameLoop(socketHandler network.NetworkController) {
 	// about 16 milliseconds for 60 fps a second
 	gameTick := time.NewTicker(time.Millisecond * 10)
 	server_tick_rate := 10 // Broadcast to clients every 10 tick
@@ -35,7 +41,7 @@ func StartGameLoop(socketHandler websockethandler.BackendController) {
 			// broadCastGameObjects()
 			current_tick = (current_tick + 1) % server_tick_rate
 			if current_tick == 0 {
-				SendServerTickToClients()
+				SendServerTickToClients(socketHandler)
 			}
 
 		}
@@ -49,7 +55,7 @@ func StartGameLoop(socketHandler websockethandler.BackendController) {
 
 // Function that sends the "server tick" to the clients
 // should be run at a reasonable pace, i.e. .1 seconds
-func SendServerTickToClients() {
+func SendServerTickToClients(networkController network.NetworkController) {
 	// for clientId, _ := range clientIdMap {
 	for clientId, clientData := range clientIdMap {
 		// build the update message
@@ -67,11 +73,18 @@ func ReadAllInputMessages() []network.Message {
 		// build the update message
 		clientInputs, sequenceNum := clientData.ReadWholeQueue()
 		updates = append(updates, clientInputs...)
+		// apply all the updates to the client
 		// add the sequence number
 		logger.Trace.Printf("For client %d, on sequence number: %d \n", clientId, sequenceNum)
 	}
 
 	return updates
+}
+
+func ReadMoveMessage(rawMoveMessage []byte) MoveMessage {
+	var moveMessage MoveMessage
+	json.Unmarshal(rawMoveMessage, &moveMessage)
+	return moveMessage
 }
 
 // func AddPhysicsComp(comp *PhysicsComponent, id string) {
