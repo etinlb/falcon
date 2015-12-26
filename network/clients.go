@@ -5,7 +5,6 @@ import (
 	"github.com/etinlb/falcon/core_lib"
 	"github.com/gorilla/websocket"
 	"sync"
-	// "sync/atomic"
 )
 
 type NetworkedGameObjects interface {
@@ -19,13 +18,12 @@ type ClientConnectMessage struct {
 }
 
 // keeps track of data from a client
+// Ignores Input queue and Socket when marshalling
 type ClientData struct {
-	Socket      *websocket.Conn
-	GameObjects map[string]core_lib.GameObject
-	// Player               core_lib.GameObject
-	ClientId             int
+	Socket               *websocket.Conn `json:"-"`
+	Id                   string
 	CurrentSequnceNumber int
-	InputQueue           *MessageQueue
+	InputQueue           *MessageQueue `json:"-"`
 }
 
 type MessageQueue struct {
@@ -40,8 +38,14 @@ type ClientMessage struct {
 
 func NewClient(conn *websocket.Conn) (client ClientData) {
 	messageQueue := MessageQueue{Queue: make([]Message, 1)}
-	newClient := ClientData{Socket: conn, GameObjects: make(map[string]core_lib.GameObject), InputQueue: &messageQueue}
+	newClient := ClientData{}
+
+	newClient.Socket = conn
+	newClient.InputQueue = &messageQueue
 	newClient.CurrentSequnceNumber = 0
+	// TODO: Do we trust unique short id to be unique? Yeah probably.
+	newClient.Id = core_lib.UniqueShortId()
+
 	return newClient
 }
 
