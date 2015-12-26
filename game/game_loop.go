@@ -61,7 +61,7 @@ func SendServerTickToClients(networkController network.NetworkController) {
 		// build the update message
 		sequenceNum := clientData.CurrentSequnceNumber
 		// add the sequence number
-		logger.Trace.Printf("Sending: %d who is on sequence nubmer %d", clientId, sequenceNum)
+		logger.Trace.Printf("Sending: %s who is on sequence nubmer %d", clientId, sequenceNum)
 	}
 }
 
@@ -75,7 +75,7 @@ func ReadAllInputMessages() []network.Message {
 		updates = append(updates, clientInputs...)
 		// apply all the updates to the client
 		// add the sequence number
-		logger.Trace.Printf("For client %d, on sequence number: %d \n", clientId, sequenceNum)
+		logger.Trace.Printf("For client %s, on sequence number: %d \n", clientId, sequenceNum)
 	}
 
 	return updates

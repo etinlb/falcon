@@ -3,12 +3,16 @@ package main
 
 import (
 	"encoding/json"
-	// "github.com/etinlb/falcon/core_lib"
+	"github.com/etinlb/falcon/core_lib"
 	"github.com/etinlb/falcon/logger"
 	"github.com/etinlb/falcon/network"
 	"github.com/gorilla/websocket"
-	"math/rand"
 )
+
+type Client struct {
+	network.ClientData
+	Player core_lib.Player
+}
 
 // Client events is data sent from the client to the server
 func HandleClientEvent(event []byte, conn *websocket.Conn) *network.Message {
@@ -31,24 +35,29 @@ func initializeClientData(conn *websocket.Conn) *network.Message {
 	// initialize the connection
 	logger.Info.Println("Connecting client")
 	clientData := network.NewClient(conn)
-	clientId := AddClientDataToMap(clientIdMap, &clientData)
-	clientData.ClientId = clientId
+	client := Client{ClientData: clientData}
+	client.Player = core_lib.NewPlayer(0, 0)
+	logger.Info.Printf("%+v Connection is \n", client.Socket)
 
-	connectionMessage := MakeConnectionMessage(clientData)
+	AddClientDataToMap(clientIdMap, &client)
+	AddClientToIdMap(&client, connections)
+
+	// clientData.Player :=`
+	connectionMessage := MakeConnectionMessage(client)
 	// make a add player event
 
 	// clientData.QueueMessage()
-	AddClientIdToMap(&clientData, clientId)
 	// clientData.Player = AddNewPlayer(clientData)
 	logger.Info.Printf("Syncing with %+v\n", connectionMessage)
 	return &connectionMessage
 }
 
-func MakeConnectionMessage(clientData network.ClientData) network.Message {
-	rawClientData, err := json.Marshal(clientData.GameObjects)
+// Makes the initial data message to send to the a connecting client.
+func MakeConnectionMessage(client Client) network.Message {
+	rawClientData, err := json.Marshal(client)
 	rawJsonData := json.RawMessage(rawClientData)
 	if err != nil {
-		logger.Error.Panicf("Couldn't format data: %+v. Err: %s\n\n", clientData, err)
+		logger.Error.Panicf("Couldn't format data: %+v. Err: %s\n\n", client, err)
 	}
 
 	connectionMessage := network.Message{Event: "connect", Data: &rawJsonData}
@@ -71,17 +80,21 @@ func MakeConnectionMessage(clientData network.ClientData) network.Message {
 //     return connections
 // }
 
-func AddClientIdToMap(client *network.ClientData, clientId int) {
-	connections[client.Socket] = clientId
+func AddClientToIdMap(client *Client, connections map[*websocket.Conn]string) {
+	connections[client.Socket] = client.Id
 }
 
-func AddClientDataToMap(mapToAdd map[int]*network.ClientData, clientToAdd *network.ClientData) int {
-	x := rand.Int()
-	for {
-		if _, ok := mapToAdd[x]; !ok {
-			mapToAdd[x] = clientToAdd
-			return x
-		}
-		x = rand.Int()
-	}
+func AddClientDataToMap(mapToAdd map[string]*Client, clientToAdd *Client) {
+	id := clientToAdd.Id
+	mapToAdd[id] = clientToAdd
+
+	// core_lib.UniqueShortId()
+	// x := rand.Int()
+	// for {
+	// 	if _, ok := mapToAdd[x]; !ok {
+	// 		mapToAdd[x] = clientToAdd
+	// 		return x
+	// 	}
+	// 	x = rand.Int()
+	// }
 }

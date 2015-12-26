@@ -25,8 +25,8 @@ var gameObjects map[string]network.NetworkedGameObjects
 // var channelCoordinator ComunicationChannels
 
 // Connection structures
-var connections map[*websocket.Conn]int // Maps the connection object to the client id
-var clientIdMap map[int]*network.ClientData
+var connections map[*websocket.Conn]string // Maps the connection object to the client id
+var clientIdMap map[string]*Client
 
 // map that keeps track of what data came from what client
 
@@ -74,8 +74,8 @@ func initializeConnectionData() {
 	logger.Trace.Println("Initailize connection varibles")
 	// TODO: Access if we need the clients variable
 	// clients = make(map[*websocket.Conn]*ClientData)
-	connections = make(map[*websocket.Conn]int)
-	clientIdMap = make(map[int]*network.ClientData)
+	connections = make(map[*websocket.Conn]string)
+	clientIdMap = make(map[string]*Client)
 }
 
 func main() {
