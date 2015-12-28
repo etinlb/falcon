@@ -26,10 +26,11 @@ function Game() {
 
   // TODO: Need to make a sync command from the server so it can send all the
   // game objects that were previously created.
-  this.connection.bind( "createPlayer", this.createGameObj, this );
-  this.connection.bind( "createObject", this.createGameObj, this );
+  this.connection.bind( "connect", this.handleInitialConnection, this );
+  // this.connection.bind( "createPlayer", this.createGameObj, this );
+  // this.connection.bind( "createObject", this.createGameObj, this );
   this.connection.bind( "update", this.updateRemoteObjects, this )
-  this.connection.bind( "sync", this.sync, this )
+  // this.connection.bind( "sync", this.sync, this )
 };
 
 Game.prototype = {
@@ -53,15 +54,6 @@ Game.prototype = {
     this.drawFrameRate = new FrameRateTracker("drawfps");
     this.networkRate = new FrameRateTracker("networkfps");
 
-
-    // TODO: read from settings maybe?
-    // TODO: Actually, move to the component base system you had in the other failed game
-    // and have a component called Player Controlled object or something
-    this.player = new Unit();
-    this.addGameObject( this.player );
-
-    connectionQueue.push( {"event":"createPlayer", "packet" : this.player.buildPacket() })
-
     // var gameState = new GameState();
     // this.addGameObject( gameState );
 
@@ -78,10 +70,15 @@ Game.prototype = {
    */
   updateRemoteObjects: function( evt )
   {
-    for (var i = evt.length - 1; i >= 0; i--) {
-      var id = evt[i].id;
-      this.unitManager.units[id].updatePositionFromPacket(evt[i]);
-    };
+    // TODO: Make this work on an array
+    var id = evt.Id;
+    this.unitManager.units[id].updatePositionFromPacket(evt);
+
+    // This is how ti used to work with an array
+    // for (var i = evt.length - 1; i >= 0; i--) {
+    //   var id = evt[i].id;
+    //   this.unitManager.units[id].updatePositionFromPacket(evt[i]);
+    // };
 
     if(debug){
       this.debugNetwork();
@@ -101,6 +98,14 @@ Game.prototype = {
 
   },
 
+  handleInitialConnection: function(connectionData)
+  {
+    console.log(connectionData);
+    this.serverData = new ServerConnection(connectionData.id, connectionData.sequenceNumber);
+    this.player = this.parseNetworkGameObject( connectionData.player );
+    this.addGameObject( this.player );
+  },
+
   // TODO: Switch based on the type field of the game object
   createGameObj: function( gameObject )
   {
@@ -110,6 +115,22 @@ Game.prototype = {
     object.id = gameObject.id;
 
     this.addGameObject( object );
+  },
+
+  parseNetworkGameObject: function( gameObject )
+  {
+    var location = gameObject.PhysicsComp.location,
+        velocity = gameObject.PhysicsComp.velocity;
+
+    var object = new Unit();
+
+    object.id = gameObject.id;
+    object.x = location.x;
+    object.y =  settings.canvasHeight - location.y - 30;
+    object.xVel = velocity.x;
+    object.yVel = velocity.y;
+
+    return object;
   },
 
   addGameObject: function( gameObject )

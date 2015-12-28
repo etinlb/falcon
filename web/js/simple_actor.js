@@ -30,7 +30,7 @@ Unit.prototype =
   draw: function(context)
   {
     context.fillStyle = this.color;
-
+    console.log("Drawing");
     var x = (this.x);
     var y = (this.y);
 
@@ -103,8 +103,9 @@ Unit.prototype =
 
   updatePositionFromPacket: function(packet)
   {
-    this.x = packet.x;
-    this.y = packet.y;
+    this.x = 400 - packet.Location.x;
+    this.y = 400 - packet.Location.y;
+    this.xVel = packet.Velocity.x;
+    this.yVel = packet.Velocity.y;
   }
-
 }

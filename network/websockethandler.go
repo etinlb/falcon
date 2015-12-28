@@ -62,7 +62,7 @@ func (b NetworkController) BroadCastPackets(msg []byte, excludeList map[*websock
 
 func (b NetworkController) WsHandler(writer http.ResponseWriter, request *http.Request) {
 	conn, err := websocket.Upgrade(writer, request, nil, 1024, 1024)
-	log.Println("getting a connection")
+
 	if _, ok := err.(websocket.HandshakeError); ok {
 		log.Println("error")
 		http.Error(writer, "got a websocket handshake", 400)
@@ -72,9 +72,7 @@ func (b NetworkController) WsHandler(writer http.ResponseWriter, request *http.R
 		return
 	}
 
-	log.Println("===================")
 	connectionMessage := b.ConnectionHandler(conn)
-	log.Printf("%+v\n", connectionMessage)
 	defer b.CleanUpHandler(conn)      // if this function ever exits, clean up the data
 	defer delete(b.connections, conn) // if this function ever exits, clean up the data
 
@@ -115,6 +113,10 @@ func (b NetworkController) SendMessage(msg Message, conn *websocket.Conn) error 
 	}
 	// logger.Trace.("Sending %s", string(rawMessage))
 	return b.SendToClient(rawMessage, conn)
+}
+
+func (b NetworkController) Send(msg Message, client ClientData) error {
+	return b.SendMessage(msg, client.Socket)
 }
 
 // send all game objects that are currently in the game object map to the

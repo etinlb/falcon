@@ -17,20 +17,12 @@ type BaseGameObjData struct {
 	// SourceId int    `json:"sourceId"`
 }
 
+type BaseRectData struct {
+	Velocity Vector2D
+	Location Vector2D
+}
+
 func NewBaseGameObjData() BaseGameObjData {
 	id := UniqueShortId()
 	return BaseGameObjData{id}
-}
-
-func NewPlayer(x, y int) Player {
-	physicsComponenet := NewPhysicsComponent(x, y)
-
-	// TODO: Make a source id?
-	baseData := NewBaseGameObjData()
-	playerObject := Player{
-		PhysicsComp:     &physicsComponenet,
-		BaseGameObjData: baseData,
-	}
-
-	return playerObject
 }

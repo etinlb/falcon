@@ -21,9 +21,9 @@ type ClientConnectMessage struct {
 // Ignores Input queue and Socket when marshalling
 type ClientData struct {
 	Socket               *websocket.Conn `json:"-"`
+	CurrentSequnceNumber int             `json:"sequenceNumber"`
+	InputQueue           *MessageQueue   `json:"-"`
 	Id                   string
-	CurrentSequnceNumber int
-	InputQueue           *MessageQueue `json:"-"`
 }
 
 type MessageQueue struct {

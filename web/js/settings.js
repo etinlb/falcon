@@ -6,6 +6,8 @@ var settings =
   // mouseCanvasId: 'mousecanvas',
   canvasId: "gamecanvas",
   backgroundImage: null, // no background image yet
+  canvasWidth: 400,
+  canvasHeight: 400,
 
   // network settings
   webSocketUrl: "ws://localhost:8080/ws", // the websocket passed to the

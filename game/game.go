@@ -1,25 +1,22 @@
 package main
 
 import (
-	// "bytes"
-	// "encoding/json"
 	"flag"
 	"fmt"
-	// "io/ioutil"
-	"net/http"
-	"os"
-	// "strconv"
-
+	"github.com/etinlb/falcon/core_lib"
 	"github.com/etinlb/falcon/logger"
 	"github.com/etinlb/falcon/network"
 	"github.com/gorilla/websocket"
+	"io/ioutil"
+	"net/http"
+	"os"
 )
 
 // various object maps to keep track of different types of objects
-var gameObjects map[string]network.NetworkedGameObjects
+var gameObjects map[string]GameObject
 
 // var playerObjects map[string]*Player
-// var physicsComponents map[string]*PhysicsComponent
+var physicsComponents map[string]*core_lib.PhysicsComponent
 
 // Communication coordinator
 // var channelCoordinator ComunicationChannels
@@ -58,15 +55,15 @@ func cleanUpSocket(conn *websocket.Conn) *network.Message {
 func initializeGameData() {
 	logger.Trace.Println("Initalizing all game data")
 	// keyed by id
-	gameObjects = make(map[string]network.NetworkedGameObjects)
+	gameObjects = make(map[string]GameObject)
 	// playerObjects = make(map[string]*Player)
-	// physicsComponents = make(map[string]*PhysicsComponent)
+	physicsComponents = make(map[string]*core_lib.PhysicsComponent)
 }
 
 func initializeLogger() {
 	// TODO: Read a config file
-	logger.InitLogger(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
-	// InitLogger(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+	// logger.InitLogger(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
+	logger.InitLogger(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 }
 
 // TODO: SHould this be in server vars?
@@ -108,12 +105,6 @@ func main() {
 
 	addr := fmt.Sprintf("0.0.0.0:%d", *port)
 	StartGameLoop(clientBackend)
-
-	// Add channels to the channel coordinator
-	// channelCoordinator = ComunicationChannels{
-	// 	moveChannel:         moveChannel,
-	// 	addChannel:          addChannel,
-	// 	broadcastAddChannel: broadcastAddChannel}
 
 	if *interactive {
 		go runHttpServer(addr)

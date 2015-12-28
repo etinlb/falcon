@@ -1,17 +1,12 @@
 package main
 
 import (
-	"encoding/json"
+	// "encoding/json"
+	"github.com/etinlb/falcon/core_lib"
 	"github.com/etinlb/falcon/logger"
 	"github.com/etinlb/falcon/network"
 	"time"
 )
-
-// XXX============================move somewhere else===========
-type MoveMessage struct {
-	X int `json:"xVel"`
-	Y int `json:"yVel"`
-}
 
 // Spawns the game loop and returns the channels to comminucate with the game
 // TODO: Currently that is just the move channels, maybe return the ticker channel?
@@ -20,6 +15,14 @@ func StartGameLoop(socketHandler network.NetworkController) {
 	// about 16 milliseconds for 60 fps a second
 	gameTick := time.NewTicker(time.Millisecond * 10)
 	server_tick_rate := 10 // Broadcast to clients every 10 tick
+
+	// Init Physics
+	physicsSpace := core_lib.NewPhysicsSpace(400, 400, 0.016)
+	// TODO: How should the phsysics bodies be initialized? Game logic needs
+	// them to set speeds while the physics engine needs the bodies to
+	// simulate. They should be the same map but where does it come from?
+	// Take the space one for now
+	physicsComponents = physicsSpace.Bodys
 
 	// // Physics runs at 50 fps
 	// physicsTick := time.NewTicker(time.Millisecond * 20)
@@ -36,6 +39,11 @@ func StartGameLoop(socketHandler network.NetworkController) {
 		// Run the game loop forever.
 		for range gameTick.C {
 			ReadAllInputMessages()
+
+			// TODO: Run Update on GameObjects
+
+			// TODO: Physics?
+			physicsSpace.TickPhysics(physicsSpace.Tick)
 
 			// TODO: Have this done with a channel I think...
 			// broadCastGameObjects()
@@ -56,12 +64,16 @@ func StartGameLoop(socketHandler network.NetworkController) {
 // Function that sends the "server tick" to the clients
 // should be run at a reasonable pace, i.e. .1 seconds
 func SendServerTickToClients(networkController network.NetworkController) {
-	// for clientId, _ := range clientIdMap {
+	// TODO: This should build the common update that will be sent to all clients
+	// first.
 	for clientId, clientData := range clientIdMap {
 		// build the update message
 		sequenceNum := clientData.CurrentSequnceNumber
+		update := clientData.Player.BuildUpdateMessage()
+		networkController.Send(update, clientData.ClientData)
+
 		// add the sequence number
-		logger.Trace.Printf("Sending: %s who is on sequence nubmer %d", clientId, sequenceNum)
+		logger.Trace.Printf("Sending: %s who is on sequence nubmer %d this data %s\n", clientId, sequenceNum, string(*update.Data))
 	}
 }
 
@@ -81,11 +93,11 @@ func ReadAllInputMessages() []network.Message {
 	return updates
 }
 
-func ReadMoveMessage(rawMoveMessage []byte) MoveMessage {
-	var moveMessage MoveMessage
-	json.Unmarshal(rawMoveMessage, &moveMessage)
-	return moveMessage
-}
+// func ReadMoveMessage(rawMoveMessage []byte) MoveMessage {
+// 	var moveMessage MoveMessage
+// 	json.Unmarshal(rawMoveMessage, &moveMessage)
+// 	return moveMessage
+// }
 
 // func AddPhysicsComp(comp *PhysicsComponent, id string) {
 //     physicsComponents[id] = comp

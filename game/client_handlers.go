@@ -11,7 +11,7 @@ import (
 
 type Client struct {
 	network.ClientData
-	Player core_lib.Player
+	Player Player `json:"player"`
 }
 
 // Client events is data sent from the client to the server
@@ -34,10 +34,17 @@ func HandleClientEvent(event []byte, conn *websocket.Conn) *network.Message {
 func initializeClientData(conn *websocket.Conn) *network.Message {
 	// initialize the connection
 	logger.Info.Println("Connecting client")
+
+	// Init all data that a client uses
 	clientData := network.NewClient(conn)
 	client := Client{ClientData: clientData}
-	client.Player = core_lib.NewPlayer(0, 0)
-	logger.Info.Printf("%+v Connection is \n", client.Socket)
+	client.Player = NewPlayer(200, 400)
+
+	// TODO: Add players to the game objects and physics component structs
+	AddPhysicsComp(physicsComponents, client.Player.PhysicsComp, client.Player.Id)
+	AddPlayerObjectToWorld(client.Player)
+
+	logger.Info.Printf("%+v game Objects\n", gameObjects)
 
 	AddClientDataToMap(clientIdMap, &client)
 	AddClientToIdMap(&client, connections)
@@ -82,6 +89,14 @@ func MakeConnectionMessage(client Client) network.Message {
 
 func AddClientToIdMap(client *Client, connections map[*websocket.Conn]string) {
 	connections[client.Socket] = client.Id
+}
+
+func AddPlayerObjectToWorld(player Player) {
+	gameObjects[player.Id] = &player
+}
+
+func AddPhysicsComp(physicsCompMap map[string]*core_lib.PhysicsComponent, comp *core_lib.PhysicsComponent, id string) {
+	physicsCompMap[id] = comp
 }
 
 func AddClientDataToMap(mapToAdd map[string]*Client, clientToAdd *Client) {
