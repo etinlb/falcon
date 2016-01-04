@@ -71,7 +71,7 @@ Game.prototype = {
   updateRemoteObjects: function( evt )
   {
     // TODO: Make this work on an array
-    var id = evt.Id;
+    var id = evt.id;
     this.unitManager.units[id].updatePositionFromPacket(evt);
 
     // This is how ti used to work with an array
@@ -226,6 +226,7 @@ Game.prototype = {
   },
 
   upKeyUpEvent: function(evt){
+    return
     var key = evt.keyCode;
     switch(key) {
       case settings.KEY.LEFT:
@@ -250,8 +251,10 @@ Game.prototype = {
   sendMoveEvent: function(forceX, forceY) {
     console.log("Sending move event with this force");
     var packet = {
-      xVel: forceX,
-      yVel: forceY,
+      Velocity: {
+        x: forceX,
+        y: forceY
+      },
       id: this.player.id
     };
     this.connection.send( "move", packet );

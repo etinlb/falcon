@@ -7,7 +7,7 @@ import (
 	"github.com/etinlb/falcon/logger"
 	"github.com/etinlb/falcon/network"
 	"github.com/gorilla/websocket"
-	"io/ioutil"
+	// "io/ioutil"
 	"net/http"
 	"os"
 )
@@ -62,8 +62,8 @@ func initializeGameData() {
 
 func initializeLogger() {
 	// TODO: Read a config file
-	// logger.InitLogger(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
-	logger.InitLogger(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+	logger.InitLogger(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
+	// logger.InitLogger(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 }
 
 // TODO: SHould this be in server vars?

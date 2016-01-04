@@ -10,5 +10,5 @@ import (
 
 type UpdateMessage struct {
 	core_lib.BaseRectData
-	Id string
+	Id string `json:"id"`
 }

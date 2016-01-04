@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "encoding/json"
+	"encoding/json"
 	"github.com/etinlb/falcon/core_lib"
 	"github.com/etinlb/falcon/logger"
 	"github.com/etinlb/falcon/network"
@@ -13,7 +13,7 @@ import (
 // TODO: TODO: Make it return channel of channels
 func StartGameLoop(socketHandler network.NetworkController) {
 	// about 16 milliseconds for 60 fps a second
-	gameTick := time.NewTicker(time.Millisecond * 10)
+	gameTick := time.NewTicker(time.Millisecond * 16)
 	server_tick_rate := 10 // Broadcast to clients every 10 tick
 
 	// Init Physics
@@ -38,8 +38,11 @@ func StartGameLoop(socketHandler network.NetworkController) {
 		current_tick := 0
 		// Run the game loop forever.
 		for range gameTick.C {
-			ReadAllInputMessages()
+			updates := ReadAllInputMessages()
 
+			if len(updates) != 0 {
+				ApplyMessages(updates, gameObjects)
+			}
 			// TODO: Run Update on GameObjects
 
 			// TODO: Physics?
@@ -77,6 +80,20 @@ func SendServerTickToClients(networkController network.NetworkController) {
 	}
 }
 
+func ApplyMessages(messages []network.Message, gameObjects map[string]GameObject) {
+	logger.Info.Printf("%+v", messages)
+
+	for _, messages := range messages {
+		if messages.Event == "move" {
+			var updateMessage UpdateMessage
+			_ = json.Unmarshal(*messages.Data, &updateMessage)
+			logger.Info.Printf("Moving message %+v \n", updateMessage)
+			gameObject := physicsComponents[updateMessage.Id]
+			gameObject.Move(updateMessage.Velocity.X, updateMessage.Velocity.Y)
+		}
+	}
+}
+
 func ReadAllInputMessages() []network.Message {
 	updates := make([]network.Message, 0)
 	for clientId, clientData := range clientIdMap {
@@ -84,6 +101,7 @@ func ReadAllInputMessages() []network.Message {
 		// for clientId, clientData := range clientIdMap {
 		// build the update message
 		clientInputs, sequenceNum := clientData.ReadWholeQueue()
+		logger.Trace.Printf("Inputes are %+v \n", clientInputs)
 		updates = append(updates, clientInputs...)
 		// apply all the updates to the client
 		// add the sequence number

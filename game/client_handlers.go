@@ -24,9 +24,9 @@ func HandleClientEvent(event []byte, conn *websocket.Conn) *network.Message {
 
 	clientId := connections[conn]
 	clientData := clientIdMap[clientId]
-	logger.Trace.Printf("Queueing\n")
+	logger.Trace.Printf("Queueing %+v data is %s\n", message, string(*message.Data))
 	clientData.QueueMessage(message)
-	logger.Trace.Printf("Queued\n")
+	logger.Trace.Printf("Queued %+v \n", clientData.InputQueue)
 	return nil
 	// return &message
 }
