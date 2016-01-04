@@ -78,7 +78,7 @@ func SendServerTickToClients(networkController network.NetworkController) {
 }
 
 func ReadAllInputMessages() []network.Message {
-	updates := make([]network.Message, 1)
+	updates := make([]network.Message, 0)
 	for clientId, clientData := range clientIdMap {
 
 		// for clientId, clientData := range clientIdMap {

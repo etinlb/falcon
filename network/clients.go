@@ -37,7 +37,7 @@ type ClientMessage struct {
 }
 
 func NewClient(conn *websocket.Conn) (client ClientData) {
-	messageQueue := MessageQueue{Queue: make([]Message, 1)}
+	messageQueue := MessageQueue{Queue: make([]Message, 0)}
 	newClient := ClientData{}
 
 	newClient.Socket = conn
@@ -56,13 +56,14 @@ func NewMessageQueue() *MessageQueue {
 }
 
 func NewQueue() []Message {
-	return make([]Message, 1)
+	return make([]Message, 0)
 }
 
 func (c *ClientData) ReadWholeQueue() ([]Message, int) {
 	c.InputQueue.Lock()
 
 	messages := make([]Message, len(c.InputQueue.Queue))
+	messages = c.InputQueue.Queue[:]
 	c.InputQueue.Queue = NewQueue()
 	sequenceNumber := c.CurrentSequnceNumber
 	c.InputQueue.Unlock()
