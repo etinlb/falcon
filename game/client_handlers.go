@@ -38,7 +38,7 @@ func initializeClientData(conn *websocket.Conn) *network.Message {
 	// Init all data that a client uses
 	clientData := network.NewClient(conn)
 	client := Client{ClientData: clientData}
-	client.Player = NewPlayer(200, 400)
+	client.Player = NewPlayer(100, 300)
 
 	// TODO: Add players to the game objects and physics component structs
 	AddPhysicsComp(physicsComponents, client.Player.PhysicsComp, client.Player.Id)

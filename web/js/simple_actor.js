@@ -103,7 +103,7 @@ Unit.prototype =
 
   updatePositionFromPacket: function(packet)
   {
-    this.x = 400 - packet.Location.x;
+    this.x = packet.Location.x;
     this.y = 400 - packet.Location.y;
     this.xVel = packet.Velocity.x;
     this.yVel = packet.Velocity.y;
